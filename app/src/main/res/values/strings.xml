@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Badger Buzz</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="username">Enter username</string>
+    <string name="EnterPassword">Enter Password</string>
+    <string name="SignUpButton">Sign in</string>
+    <string name="NoAccount">Do not have an account? Create One?</string>
 </resources>
