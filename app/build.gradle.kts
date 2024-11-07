@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.cs407.badgerbuzz"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.cs407.badgerbuzz"

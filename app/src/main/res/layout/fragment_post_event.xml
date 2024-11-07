@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PostEventFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="40sp"
+                android:text="@string/create_event"
+                android:textColor="@color/black"
+                android:textSize="50sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/eventNameEditText"
+                style="@style/Widget.AppCompat.EditText"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/event_name"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <EditText
+                android:id="@+id/eventDescriptionEditText"
+                style="@style/Widget.AppCompat.EditText"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:hint="Event Description"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <ImageView
+                android:id="@+id/eventImage"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:src="@android:drawable/ic_menu_gallery" />
+
+            <Button
+                android:id="@+id/addImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Image"
+                app:icon="@android:drawable/ic_menu_gallery" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/EventLocationEditText"
+                    style="@style/Widget.AppCompat.EditText"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Event Location"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <ImageButton
+                    android:id="@+id/currentLocationButton"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_menu_mylocation" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/eventDateEditText"
+                    style="@style/Widget.AppCompat.EditText"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Event Date"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <ImageButton
+                    android:id="@+id/eventDateButton"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_menu_today" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/eventTimeEditText"
+                    style="@style/Widget.AppCompat.EditText"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Event Time"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <ImageButton
+                    android:id="@+id/eventTimeButton"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_menu_recent_history" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/postEventButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Post Event"
+                app:icon="@android:drawable/ic_menu_send" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
