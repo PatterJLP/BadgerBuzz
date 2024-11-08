@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.Spinner
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -38,6 +39,8 @@ class MapsFragment : Fragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
 
+
+
         val spinner: Spinner = view.findViewById(R.id.filterTests)
         ArrayAdapter.createFromResource(
             requireContext(),
@@ -47,6 +50,8 @@ class MapsFragment : Fragment() {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.adapter = adapter
         }
+
+
 
 
 
