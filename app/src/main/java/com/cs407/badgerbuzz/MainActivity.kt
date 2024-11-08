@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.testButton).setOnClickListener{
             fragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, MapsFragment::class.java, null)
+                .replace(R.id.fragmentContainerView, PostEventFragment::class.java, null)
                 .setReorderingAllowed(true)
                 .addToBackStack("showing First")
                 .commit()
