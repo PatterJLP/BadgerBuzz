@@ -30,13 +30,15 @@ class MainActivity : AppCompatActivity() {
 
         val fragmentManager = supportFragmentManager
 
-        findViewById<Button>(R.id.testButton).setOnClickListener{
-            fragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, PostEventFragment::class.java, null)
-                .setReorderingAllowed(true)
-                .addToBackStack("showing First")
-                .commit()
-        }
+        fragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainerView, LoginFragment::class.java, null)
+            .setReorderingAllowed(true)
+            .addToBackStack("showing loginActivity")
+            .commit()
+
+
+
+
     }
 
 
