@@ -7,7 +7,7 @@
     <string name="EnterPassword">Enter Password</string>
     <string name="SignUpButton">Sign in</string>
     <string name="NoAccount">Do not have an account? Create One?</string>
-    <string name ="FilterEvents">Filter Events</string>
+    <string name="FilterEvents">Filter Events</string>
     <string-array name="filter_array">
         <item>Filter Events: </item>
         <item>Sporting</item>
@@ -15,5 +15,7 @@
         <item>Social</item>
         <item>Festivals</item>
     </string-array>
-    <string name = "addEvent">Add Event</string>
+    <string name="addEvent">Add Event</string>
+    <string name="createAccount">Create Account</string>
+    <string name="confirmPassword">Confirm Password</string>
 </resources>
