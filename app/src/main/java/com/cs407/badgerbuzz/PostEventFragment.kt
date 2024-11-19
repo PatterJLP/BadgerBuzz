@@ -34,6 +34,9 @@ class PostEventFragment : Fragment() {
         requireView().findViewById<ImageButton>(R.id.eventDateButton).setOnClickListener {
             DatePickerFragment().show(parentFragmentManager, "datePicker")
         }
+        requireView().findViewById<Button>(R.id.postEventButton).setOnClickListener {
+            navigateToFragment(MapsFragment::class.java, "showing Map")
+        }
     }
 
     class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
@@ -70,5 +73,14 @@ class PostEventFragment : Fragment() {
         override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
             // Do something with the time the user picks.
         }
+    }
+
+    private fun navigateToFragment(fragmentClass: Class<out Fragment>, backStackName: String) {
+
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainerView, fragmentClass, null)
+            .setReorderingAllowed(true)
+            .addToBackStack(backStackName)
+            .commitAllowingStateLoss()
     }
 }
