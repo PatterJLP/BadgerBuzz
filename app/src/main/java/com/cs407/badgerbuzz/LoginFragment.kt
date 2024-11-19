@@ -75,6 +75,7 @@ class LoginFragment : Fragment() {
 
 
     private fun navigateToFragment(fragmentClass: Class<out Fragment>, backStackName: String) {
+
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainerView, fragmentClass, null)
             .setReorderingAllowed(true)
