@@ -35,10 +35,6 @@ class MainActivity : AppCompatActivity() {
             .setReorderingAllowed(true)
             .addToBackStack("showing loginActivity")
             .commit()
-
-
-
-
     }
 
 

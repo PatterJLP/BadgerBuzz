@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -62,12 +64,21 @@ class LoginFragment : Fragment() {
 
         val loginButton: Button = view.findViewById(R.id.signUp)
         loginButton.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainerView, MapsFragment::class.java, null)
-                .setReorderingAllowed(true)
-                .addToBackStack("showing First")
-                .commit()
+            navigateToFragment(MapsFragment::class.java, "showing Maps")
+        }
+
+        val noAccountTextView: TextView = view.findViewById(R.id.NoAccount)
+        noAccountTextView.setOnClickListener {
+            navigateToFragment(CreateAccountFragment::class.java, "showing Create")
         }
     }
-}
 
+
+    private fun navigateToFragment(fragmentClass: Class<out Fragment>, backStackName: String) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainerView, fragmentClass, null)
+            .setReorderingAllowed(true)
+            .addToBackStack(backStackName)
+            .commitAllowingStateLoss()
+    }
+}
