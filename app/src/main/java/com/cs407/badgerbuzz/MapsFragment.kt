@@ -16,6 +16,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MapsFragment : Fragment() {
 
@@ -51,11 +52,20 @@ class MapsFragment : Fragment() {
             spinner.adapter = adapter
         }
 
+        val fab = view.findViewById<FloatingActionButton>(R.id.fab)
+        fab.setOnClickListener {
+            navigateToFragment(PostEventFragment::class.java, "showing Post Event")
+        }
 
 
+    }
 
+    private fun navigateToFragment(fragmentClass: Class<out Fragment>, backStackName: String) {
 
-
-
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainerView, fragmentClass, null)
+            .setReorderingAllowed(true)
+            .addToBackStack(backStackName)
+            .commitAllowingStateLoss()
     }
 }
