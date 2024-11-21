@@ -3,7 +3,7 @@
     <string name="create_event">Create Event</string>
     <string name="event_name">Event Name</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="username">Enter username</string>
+    <string name="username">Enter Email</string>
     <string name="EnterPassword">Enter Password</string>
     <string name="SignUpButton">Sign in</string>
     <string name="NoAccount">Do not have an account? Create One?</string>
