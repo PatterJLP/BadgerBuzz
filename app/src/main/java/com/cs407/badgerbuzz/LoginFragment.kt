@@ -1,6 +1,8 @@
 package com.cs407.badgerbuzz
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -8,9 +10,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.google.firebase.Firebase
+import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -50,8 +57,49 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_login, container, false)
+        val view = inflater.inflate(R.layout.fragment_login, container, false)
+
+        val username: EditText = view.findViewById(R.id.usernameLogin)
+        val passwordLogin: EditText = view.findViewById(R.id.passwordLogin)
+        val loginButton: Button = view.findViewById(R.id.signUp)
+
+        loginButton.setOnClickListener{
+            val email = username.text.toString().trim()
+            val password = passwordLogin.text.toString().trim()
+            loginAccount(email,password)
+        }
+
+        return view
+    }
+
+    private fun loginAccount(email: String, password: String) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d(TAG, "signInWithEmail:success")
+                    val user = auth.currentUser
+                    updateUI(user)
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w(TAG, "signInWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        requireContext(),
+                        "Authentication failed.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    updateUI(null)
+                }
+            }
+    }
+
+    private fun updateUI(user: FirebaseUser?) {
+        if (user != null) {
+            Log.d(TAG, "User created: ${user.email}")
+            navigateToFragment(MapsFragment::class.java,"showing maps")
+        } else {
+            Log.d(TAG, "Account Creation Failed")
+        }
     }
 
     companion object {
@@ -76,10 +124,6 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val loginButton: Button = view.findViewById(R.id.signUp)
-        loginButton.setOnClickListener {
-            navigateToFragment(MapsFragment::class.java, "showing Maps")
-        }
 
         val noAccountTextView: TextView = view.findViewById(R.id.NoAccount)
         noAccountTextView.setOnClickListener {
