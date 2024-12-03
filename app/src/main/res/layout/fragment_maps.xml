@@ -5,6 +5,20 @@
     android:layout_height="match_parent"
     tools:context=".MapsFragment">
 
+    <ImageView
+        android:id="@+id/menu_icon"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:contentDescription="Menu item"
+        android:src="@drawable/baseline_menu_24"
+        android:layout_marginTop="48dp"
+        android:layout_marginLeft="-10dp"
+        android:scaleX="0.65"
+        android:scaleY="0.65" />
+
+
     <!-- White overlay for the top quarter of the screen -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -20,15 +34,14 @@
             app:layout_constraintWidth_default="spread" />
 
 
-
         <!-- SearchView centered in top_white_overlay -->
 
         <!-- Existing Map Fragment takes up the remaining space -->
 
 
         <SearchView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="353dp"
+            android:layout_height="50dp"
             android:layout_margin="8dp"
             android:background="@drawable/searchview_background"
             android:iconifiedByDefault="false"
@@ -49,7 +62,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/top_white_overlay" />
-
 
 
         <Spinner
