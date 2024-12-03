@@ -63,6 +63,9 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-auth:22.0.0")
+    implementation ("com.google.firebase:firebase-firestore:24.6.0")
+    implementation ("com.google.firebase:firebase-storage:20.2.1") // For image uploads
+
 
 
 

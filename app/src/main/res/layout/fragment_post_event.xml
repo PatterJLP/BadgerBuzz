@@ -40,7 +40,7 @@
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:hint="Event Description"
+                android:hint="Add Event Description"
                 android:singleLine="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -61,7 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <EditText
+                <TextView
                     android:id="@+id/EventLocationEditText"
                     style="@style/Widget.AppCompat.EditText"
                     android:layout_width="250dp"
@@ -82,12 +82,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <EditText
+                <TextView
                     android:id="@+id/eventDateEditText"
                     style="@style/Widget.AppCompat.EditText"
                     android:layout_width="250dp"
                     android:layout_height="wrap_content"
-                    android:hint="Event Date"
+                    android:hint="Event Start Date and Time"
                     android:singleLine="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -97,21 +97,6 @@
                     android:layout_height="wrap_content"
                     android:src="@android:drawable/ic_menu_today" />
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/eventTimeEditText"
-                    style="@style/Widget.AppCompat.EditText"
-                    android:layout_width="250dp"
-                    android:layout_height="wrap_content"
-                    android:hint="Event Time"
-                    android:singleLine="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
                 <ImageButton
                     android:id="@+id/eventTimeButton"
                     android:layout_width="50dp"
@@ -119,6 +104,35 @@
                     android:src="@android:drawable/ic_menu_recent_history" />
 
             </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/eventEndDateEditText"
+                    style="@style/Widget.AppCompat.EditText"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Event End Date and Time"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                <ImageButton
+                    android:id="@+id/eventEndDateButton"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_menu_today" />
+                <ImageButton
+                    android:id="@+id/eventEndTimeButton"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_menu_recent_history" />
+
+            </LinearLayout>
+
+
 
             <Button
                 android:id="@+id/postEventButton"

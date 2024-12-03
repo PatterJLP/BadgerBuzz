@@ -11,12 +11,42 @@ import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import android.text.format.DateFormat
+import android.util.Log
 import android.widget.Button
 import android.widget.DatePicker
 import android.widget.ImageButton
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
+import java.util.Date
+import kotlin.math.log
 
-class PostEventFragment : Fragment() {
+class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener {
+    val db = FirebaseFirestore.getInstance()
+    private var startDate: String? = null
+    private var endDate: String? = null
+
+
+
+    private fun addEvent(eventName: String,description: String, imageUrl: String, latitude: Double, longitude: Double, startTime: Date, endTime: Date){
+        val event = hashMapOf(
+            "eventName" to eventName,
+            "description" to description,
+            "imageUrl" to imageUrl,
+            "location" to GeoPoint(latitude, longitude),
+            "startTime" to Timestamp(startTime),
+            "endTime" to Timestamp(endTime)
+        )
+        db.collection("events")
+            .add(event)
+            .addOnSuccessListener { documentReference ->
+                Log.d("Firestore", "Event added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error adding event", e)
+            }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,35 +58,48 @@ class PostEventFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requireView().findViewById<ImageButton>(R.id.eventTimeButton).setOnClickListener {
-            TimePickerFragment().show(parentFragmentManager, "timePicker")
-        }
+
+        // Set listeners for date pickers
         requireView().findViewById<ImageButton>(R.id.eventDateButton).setOnClickListener {
-            DatePickerFragment().show(parentFragmentManager, "datePicker")
+            val datePickerFragment = DatePickerFragment()
+            datePickerFragment.setOnDateSelectedListener(this)  // Set the listener
+            datePickerFragment.show(parentFragmentManager, "startDatePicker")
         }
+
+        requireView().findViewById<ImageButton>(R.id.eventEndDateButton).setOnClickListener {
+            val datePickerFragment = DatePickerFragment()
+            datePickerFragment.setOnDateSelectedListener(this)  // Set the listener
+            datePickerFragment.show(parentFragmentManager, "endDatePicker")
+        }
+
+        // Handle the post event button logic
         requireView().findViewById<Button>(R.id.postEventButton).setOnClickListener {
             navigateToFragment(MapsFragment::class.java, "showing Map")
         }
     }
 
-    class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            // Use the current date as the default date in the picker.
-            val c = Calendar.getInstance()
-            val year = c.get(Calendar.YEAR)
-            val month = c.get(Calendar.MONTH)
-            val day = c.get(Calendar.DAY_OF_MONTH)
-
-            // Create a new instance of DatePickerDialog and return it.
-            return DatePickerDialog(requireContext(), this, year, month, day)
-
-        }
-
-        override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-            // Do something with the date the user picks.
+    override fun onDateSelected(date: String) {
+        if (startDate == null) {
+            startDate = date
+            Log.d("PostEventFragment", "Start Date: $startDate")
+        } else {
+            endDate = date
+            Log.d("PostEventFragment", "End Date: $endDate")
         }
     }
+
+    private fun navigateToFragment(fragmentClass: Class<out Fragment>, backStackName: String) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainerView, fragmentClass, null)
+            .setReorderingAllowed(true)
+            .addToBackStack(backStackName)
+            .commitAllowingStateLoss()
+    }
+}
+
+
+
 
     class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
 
@@ -75,12 +118,34 @@ class PostEventFragment : Fragment() {
         }
     }
 
-    private fun navigateToFragment(fragmentClass: Class<out Fragment>, backStackName: String) {
 
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainerView, fragmentClass, null)
-            .setReorderingAllowed(true)
-            .addToBackStack(backStackName)
-            .commitAllowingStateLoss()
+class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
+    private var listener: OnDateSelectedListener? = null
+
+    interface OnDateSelectedListener {
+        fun onDateSelected(date: String)
     }
+
+    fun setOnDateSelectedListener(listener: OnDateSelectedListener) {
+        this.listener = listener
+    }
+
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        // Use the current date as the default date in the picker.
+        val c = Calendar.getInstance()
+        val year = c.get(Calendar.YEAR)
+        val month = c.get(Calendar.MONTH)
+        val day = c.get(Calendar.DAY_OF_MONTH)
+
+        // Create a new instance of DatePickerDialog and return it.
+        return DatePickerDialog(requireContext(), this, year, month, day)
+
+    }
+
+    override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
+        val selectedDate = "$month/$day/$year"
+        listener?.onDateSelected(selectedDate)
+    }
+
 }
