@@ -65,6 +65,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:22.0.0")
     implementation ("com.google.firebase:firebase-firestore:24.6.0")
     implementation ("com.google.firebase:firebase-storage:20.2.1") // For image uploads
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1") // Update version as needed
+
 
 
 
