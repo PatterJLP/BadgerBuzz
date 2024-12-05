@@ -22,22 +22,76 @@ import com.google.firebase.auth.auth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
 
 
 class MapsFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
+    private lateinit var googleMap: GoogleMap
+    private val db = FirebaseFirestore.getInstance()
 
-    private val callback = OnMapReadyCallback { googleMap ->
+    private val callback = OnMapReadyCallback { map ->
+        googleMap = map
 
         val Madison = LatLng(43.07340550591327, -89.40070146109815)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Madison, 15f))
+
+        addMarkers()
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
     }
+
+    private val markersMap = mutableMapOf<String, com.google.android.gms.maps.model.Marker>()
+    private fun addMarkers(){
+        db.collection("events")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot) {
+                    val eventId = document.id
+                    val eventName = document.getString("eventName")
+                    val location = document.getGeoPoint("location")
+
+                    if (location != null) {
+                        val latLng = LatLng(location.latitude, location.longitude)
+
+                        val marker = googleMap.addMarker(
+                            MarkerOptions()
+                                .position(latLng)
+                                .title(eventName)
+                        )
+                        if (marker != null) {
+                            markersMap[eventId] = marker
+                        }
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                exception.printStackTrace()
+            }
+    }
+    private fun listenForEventRemovals() {
+        db.collection("events")
+            .addSnapshotListener { snapshots, error ->
+                for (change in snapshots!!.documentChanges) {
+                    when (change.type) {
+                        com.google.firebase.firestore.DocumentChange.Type.REMOVED -> {
+                            val eventId = change.document.id
+                            val marker = markersMap[eventId]
+                            marker?.remove()
+                            markersMap.remove(eventId)
+                        }
+
+
+                        else -> {}
+                    }
+                }
+            }
+    }
+
 
 
     override fun onCreateView(
@@ -53,6 +107,8 @@ class MapsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
+
+        listenForEventRemovals()
 
 
         val menuIcon: ImageView = view.findViewById(R.id.menu_icon)
