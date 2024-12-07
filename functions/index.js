@@ -10,7 +10,9 @@ exports.cleanUpExpiredEvents = functions.pubsub.schedule("every 60 minutes").onR
     const eventsRef = db.collection("events");
 
     try {
-        const snapshot = await eventsRef.where("timestamp", "<", now).get();
+        const snapshot = await eventsRef.where("endTime", "<", now).get();
+        console.log("Current Timestamp:", now.toDate());
+        console.log(snapshot.size);
 
         if (snapshot.empty) {
             console.log("No expired events to delete.");

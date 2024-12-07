@@ -22,8 +22,10 @@ import com.cs407.badgerbuzz.DatePickerFragment.OnDateSelectedListener
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.TimeZone
 import kotlin.math.log
 import kotlin.math.min
 
@@ -43,16 +45,41 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
 
 
     private fun addEvent(eventName: String,description: String, imageUrl: String, latitude: Double, longitude: Double, startTime: String, endTime: String, startDate: String, endDate: String){
+        val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+
+        val startEvent = fixDate("$startDate $startTime")
+        val endEvent = fixDate("$endDate $endTime")
+        Log.d("timetest","$startEvent")
+
+
+
+        val startDateParsed: Date = format.parse(startEvent) ?: Date()
+        val endDateParsed: Date = format.parse(endEvent) ?: Date()
+
+
+
+        val utcTimeZone = TimeZone.getTimeZone("UTC")
+        val calendarStart = Calendar.getInstance(utcTimeZone)
+        calendarStart.time = startDateParsed
+        val calendarEnd = Calendar.getInstance(utcTimeZone)
+        calendarEnd.time = endDateParsed
+
+        // Convert to Firebase Timestamp (in UTC)
+        val startTimestamp = Timestamp(calendarStart.time)
+        val endTimestamp = Timestamp(calendarEnd.time)
+
+        Log.d("time", "$startTimestamp")
+        Log.d("timeend", "$endTimestamp")
+
+
         val event = hashMapOf(
             "eventName" to eventName,
             "description" to description,
             "imageUrl" to imageUrl,
             "location" to GeoPoint(latitude, longitude),
-            "startTime" to startTime,
-            "endTime" to endTime,
-            "startDate" to startDate,
-            "endDate" to endDate
-
+            "startTime" to startTimestamp,
+            "endTime" to endTimestamp,
         )
         db.collection("events")
             .add(event)
@@ -63,6 +90,23 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
                 Log.e("Firestore", "Error adding event", e)
             }
     }
+
+    fun fixDate(date: String): String {
+        val parts = date.split(" ")
+        val dateParts = parts[0].split("-")
+        val timeParts = parts[1].split(":")
+
+        val year = dateParts[0]
+        val month = dateParts[1].padStart(2, '0')
+        val day = dateParts[2].padStart(2, '0')
+
+
+        val hour = timeParts[0].padStart(2, '0')
+        val minute = timeParts[1].padStart(2, '0')
+
+        return "$year-$month-$day $hour:$minute:00"
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -218,7 +262,7 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
     }
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-        val selectedDate = "$month/$day/$year"
+        val selectedDate = "$year-$month-$day"
         listener?.onDateSelected(selectedDate)
     }
 
