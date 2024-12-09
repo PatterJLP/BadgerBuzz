@@ -65,7 +65,7 @@ class LocationFragment : Fragment() {
 
 
                 parentFragmentManager.setFragmentResult("locationKey",bundle)
-                parentFragmentManager.popBackStack()
+            navigateToFragment(PostEventFragment::class.java, "showing location")
         }
     }
 

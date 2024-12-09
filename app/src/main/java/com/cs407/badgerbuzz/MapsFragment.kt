@@ -154,7 +154,7 @@ class MapsFragment : Fragment() {
 
         val fab = view.findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
-            navigateToFragment(PostEventFragment::class.java, "showing Post Event")
+            navigateToFragment(LocationFragment::class.java, "showing location")
         }
 
 

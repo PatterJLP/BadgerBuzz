@@ -156,9 +156,9 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
             timePickerFragment.setOnTimeSelectedListener(this)
             timePickerFragment.show(parentFragmentManager, "timePicker")
         }
-        requireView().findViewById<ImageButton>(R.id.currentLocationButton).setOnClickListener {
+        /*requireView().findViewById<ImageButton>(R.id.currentLocationButton).setOnClickListener {
             navigateToFragment(LocationFragment::class.java, "showing location")
-        }
+        }*/
         parentFragmentManager.setFragmentResultListener("locationKey",viewLifecycleOwner){_, bundle ->
             latitude = bundle.getDouble("latitude")
             longitude = bundle.getDouble("longitude")
@@ -206,8 +206,8 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
                 }
                 if (imageURL == null) imageURL = "no image"
                 addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!)
+                navigateToFragment(MapsFragment::class.java, "showing Map")
             }
-            navigateToFragment(MapsFragment::class.java, "showing Map")
         }
 
         val takePicturePreview =
