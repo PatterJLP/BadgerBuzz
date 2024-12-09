@@ -3,8 +3,12 @@ package com.cs407.badgerbuzz
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +26,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.TakePicturePreview
+import androidx.core.content.ContextCompat
 import com.cs407.badgerbuzz.DatePickerFragment.OnDateSelectedListener
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
@@ -29,9 +34,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
+import java.io.File
+import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.TimeZone
 import kotlin.math.log
 import kotlin.math.min
@@ -47,7 +55,7 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
     private var latitude: Double? = null
     private var longitude: Double? = null
     private var imageURL: String? = null
-
+    private lateinit var eventImage: ImageView
 
 
 
@@ -161,6 +169,7 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
         }
 
 
+        eventImage = requireView().findViewById<ImageView>(R.id.eventImage)
         requireView().findViewById<Button>(R.id.postEventButton).setOnClickListener {
             eventName = requireView().findViewById<EditText>(R.id.eventNameEditText).text.toString()
             description = requireView().findViewById<EditText>(R.id.eventDescriptionEditText).text.toString()
@@ -171,29 +180,36 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
                     Toast.LENGTH_SHORT,
                 ).show()
             }else {
-                if (imageURL == null){
-                    imageURL = "https://brand.wisc.edu/content/uploads/2023/09/vert-w-crest-logo-web-digital-color.png"
+                val bitmap = (eventImage.drawable as BitmapDrawable).bitmap
+                val imageFile = createImageFile()
+                imageFile.outputStream().use { outStream ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
                 }
+                val storage = Firebase.storage
+                val storageRef = storage.reference
+                val imageRef = storageRef.child(imageFile.name)
+                val stream = FileInputStream(imageFile)
+                val uploadTask = imageRef.putStream(stream)
+                uploadTask.addOnFailureListener {
+                    Toast.makeText(
+                        requireContext(),
+                        "Image upload failed",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }.addOnSuccessListener {
+                    Toast.makeText(
+                        requireContext(),
+                        "Image upload successful",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    imageURL = imageFile.name
+                }
+                if (imageURL == null) imageURL = "no image"
                 addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!)
             }
             navigateToFragment(MapsFragment::class.java, "showing Map")
         }
 
-        val storage = Firebase.storage
-        // Create a storage reference from our app
-        val storageRef = storage.reference
-
-        // Create a reference to "mountains.jpg"
-        val imageRef = storageRef.child("mountains.jpg")
-
-        // Create a reference to 'images/mountains.jpg'
-        val mountainImagesRef = storageRef.child("images/mountains.jpg")
-
-        // While the file names are the same, the references point to different files
-        //mountainsRef.name == mountainImagesRef.name // true
-        //mountainsRef.path == mountainImagesRef.path // false
-
-        val eventImage = requireView().findViewById<ImageView>(R.id.eventImage)
         val takePicturePreview =
             registerForActivityResult(TakePicturePreview()) { thumbnail: Bitmap? ->
                 eventImage.setImageBitmap(thumbnail)
@@ -203,6 +219,16 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
         }
     }
 
+    private fun createImageFile(): File {
+
+        // Create a unique filename
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val imageFilename = "photo_$timeStamp.jpg"
+
+        // Create the file in the Pictures directory on external storage
+        val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File(storageDir, imageFilename)
+    }
 
     override fun onDateSelected(date: String) {
         if (startDate == null) {
