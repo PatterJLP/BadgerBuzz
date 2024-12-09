@@ -29,13 +29,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.TimeZone
 import kotlin.math.log
 import kotlin.math.min
 
-class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
-    TimePickerFragment.OnTimeSelectedListener {
+class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,TimePickerFragment.OnTimeSelectedListener {
     val db = FirebaseFirestore.getInstance()
     private var startDate: String? = null
     private var endDate: String? = null
@@ -48,27 +49,44 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
     private var imageURL: String? = null
 
 
-    private fun addEvent(
-        eventName: String,
-        description: String,
-        imageUrl: String,
-        latitude: Double,
-        longitude: Double,
-        startTime: String,
-        endTime: String,
-        startDate: String,
-        endDate: String
-    ) {
+
+
+    private fun addEvent(eventName: String,description: String, imageUrl: String, latitude: Double, longitude: Double, startTime: String, endTime: String, startDate: String, endDate: String){
+        val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+
+        val startEvent = fixDate("$startDate $startTime")
+        val endEvent = fixDate("$endDate $endTime")
+        Log.d("timetest","$startEvent")
+
+
+
+        val startDateParsed: Date = format.parse(startEvent) ?: Date()
+        val endDateParsed: Date = format.parse(endEvent) ?: Date()
+
+
+
+        val utcTimeZone = TimeZone.getTimeZone("UTC")
+        val calendarStart = Calendar.getInstance(utcTimeZone)
+        calendarStart.time = startDateParsed
+        val calendarEnd = Calendar.getInstance(utcTimeZone)
+        calendarEnd.time = endDateParsed
+
+        // Convert to Firebase Timestamp (in UTC)
+        val startTimestamp = Timestamp(calendarStart.time)
+        val endTimestamp = Timestamp(calendarEnd.time)
+
+        Log.d("time", "$startTimestamp")
+        Log.d("timeend", "$endTimestamp")
+
+
         val event = hashMapOf(
             "eventName" to eventName,
             "description" to description,
             "imageUrl" to imageUrl,
             "location" to GeoPoint(latitude, longitude),
-            "startTime" to startTime,
-            "endTime" to endTime,
-            "startDate" to startDate,
-            "endDate" to endDate
-
+            "startTime" to startTimestamp,
+            "endTime" to endTimestamp,
         )
         db.collection("events")
             .add(event)
@@ -79,6 +97,23 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
                 Log.e("Firestore", "Error adding event", e)
             }
     }
+
+    fun fixDate(date: String): String {
+        val parts = date.split(" ")
+        val dateParts = parts[0].split("-")
+        val timeParts = parts[1].split(":")
+
+        val year = dateParts[0]
+        val month = dateParts[1].padStart(2, '0')
+        val day = dateParts[2].padStart(2, '0')
+
+
+        val hour = timeParts[0].padStart(2, '0')
+        val minute = timeParts[1].padStart(2, '0')
+
+        return "$year-$month-$day $hour:$minute:00"
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,10 +151,7 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
         requireView().findViewById<ImageButton>(R.id.currentLocationButton).setOnClickListener {
             navigateToFragment(LocationFragment::class.java, "showing location")
         }
-        parentFragmentManager.setFragmentResultListener(
-            "locationKey",
-            viewLifecycleOwner
-        ) { _, bundle ->
+        parentFragmentManager.setFragmentResultListener("locationKey",viewLifecycleOwner){_, bundle ->
             latitude = bundle.getDouble("latitude")
             longitude = bundle.getDouble("longitude")
             val latLng = requireView().findViewById<TextView>(R.id.EventLocationEditText)
@@ -131,30 +163,18 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
 
         requireView().findViewById<Button>(R.id.postEventButton).setOnClickListener {
             eventName = requireView().findViewById<EditText>(R.id.eventNameEditText).text.toString()
-            description =
-                requireView().findViewById<EditText>(R.id.eventDescriptionEditText).text.toString()
-            if (eventName == null || description == null || latitude == null || longitude == null || startTime == null || endTime == null || startDate == null || endDate == null) {
+            description = requireView().findViewById<EditText>(R.id.eventDescriptionEditText).text.toString()
+            if(eventName == null || description == null || latitude == null || longitude == null || startTime == null || endTime == null || startDate == null || endDate == null){
                 Toast.makeText(
                     requireContext(),
                     "Please Make Sure All Fields Are Filled",
                     Toast.LENGTH_SHORT,
                 ).show()
-            } else {
-                if (imageURL == null) {
-                    imageURL =
-                        "https://brand.wisc.edu/content/uploads/2023/09/vert-w-crest-logo-web-digital-color.png"
+            }else {
+                if (imageURL == null){
+                    imageURL = "https://brand.wisc.edu/content/uploads/2023/09/vert-w-crest-logo-web-digital-color.png"
                 }
-                addEvent(
-                    eventName!!,
-                    description!!,
-                    imageURL!!,
-                    latitude!!,
-                    longitude!!,
-                    startTime!!,
-                    endTime!!,
-                    startDate!!,
-                    endDate!!
-                )
+                addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!)
             }
             navigateToFragment(MapsFragment::class.java, "showing Map")
         }
@@ -219,32 +239,33 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
 }
 
 
-class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
-    private var listener: OnTimeSelectedListener? = null
 
-    interface OnTimeSelectedListener {
-        fun onTimeSelected(time: String)
+
+    class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
+        private var listener: OnTimeSelectedListener? = null
+
+        interface OnTimeSelectedListener {
+            fun onTimeSelected(time: String)
+        }
+        fun setOnTimeSelectedListener(listener: OnTimeSelectedListener) {
+            this.listener = listener
+        }
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the current time as the default values for the picker.
+            val c = Calendar.getInstance()
+            val hour = c.get(Calendar.HOUR_OF_DAY)
+            val minute = c.get(Calendar.MINUTE)
+
+            // Create a new instance of TimePickerDialog and return it.
+            return TimePickerDialog(activity, this, hour, minute, DateFormat.is24HourFormat(activity))
+        }
+
+        override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
+            val selectedTime = "$hourOfDay:$minute"
+            listener?.onTimeSelected(selectedTime)
+        }
     }
-
-    fun setOnTimeSelectedListener(listener: OnTimeSelectedListener) {
-        this.listener = listener
-    }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        // Use the current time as the default values for the picker.
-        val c = Calendar.getInstance()
-        val hour = c.get(Calendar.HOUR_OF_DAY)
-        val minute = c.get(Calendar.MINUTE)
-
-        // Create a new instance of TimePickerDialog and return it.
-        return TimePickerDialog(activity, this, hour, minute, DateFormat.is24HourFormat(activity))
-    }
-
-    override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-        val selectedTime = "$hourOfDay:$minute"
-        listener?.onTimeSelected(selectedTime)
-    }
-}
 
 
 class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
@@ -272,7 +293,7 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
     }
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-        val selectedDate = "$month/$day/$year"
+        val selectedDate = "$year-$month-$day"
         listener?.onDateSelected(selectedDate)
     }
 

@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.Spinner
+import android.widget.TextView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -43,6 +44,8 @@ class MapsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
+
+
     }
 
     private val markersMap = mutableMapOf<String, com.google.android.gms.maps.model.Marker>()
@@ -105,6 +108,11 @@ class MapsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val viewList = view.findViewById<TextView>(R.id.viewAllEvents)
+        viewList.setOnClickListener() {
+            navigateToFragment(EventListFragment::class.java, "showing list of Events")
+
+        }
         val mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
 
