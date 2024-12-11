@@ -60,8 +60,10 @@ class MapsFragment : Fragment() {
                                     val end = document.getTimestamp("endTime")?.toDate().toString()
                                     bundle.putString("endTime", end)
                                     parentFragmentManager.beginTransaction()
-                                        .replace(R.id.fragmentContainerView, ViewEventFragment.newInstance(bundle))
-                                        .commit()
+                                        .replace(R.id.fragmentContainerView, ViewEventFragment.newInstance(bundle), null)
+                                        .setReorderingAllowed(true)
+                                        .addToBackStack("viewing event")
+                                        .commitAllowingStateLoss()
                                 }
                             }
                         }
