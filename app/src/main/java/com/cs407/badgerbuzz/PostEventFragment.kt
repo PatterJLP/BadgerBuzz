@@ -328,7 +328,8 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
     }
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-        val selectedDate = "$year-$month-$day"
+        val newMonth = month + 1
+        val selectedDate = "$year-$newMonth-$day"
         listener?.onDateSelected(selectedDate)
     }
 
