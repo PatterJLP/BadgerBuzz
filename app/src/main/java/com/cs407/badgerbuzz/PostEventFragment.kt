@@ -3,10 +3,8 @@ package com.cs407.badgerbuzz
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
@@ -22,17 +20,14 @@ import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.TakePicturePreview
-import androidx.core.content.ContextCompat
-import com.cs407.badgerbuzz.DatePickerFragment.OnDateSelectedListener
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
 import java.io.File
 import java.io.FileInputStream
@@ -41,8 +36,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import kotlin.math.log
-import kotlin.math.min
 
 class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,TimePickerFragment.OnTimeSelectedListener {
     val db = FirebaseFirestore.getInstance()
@@ -59,7 +52,7 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
 
 
 
-    private fun addEvent(eventName: String,description: String, imageUrl: String, latitude: Double, longitude: Double, startTime: String, endTime: String, startDate: String, endDate: String){
+    private fun addEvent(eventName: String,description: String, imageUrl: String, latitude: Double, longitude: Double, startTime: String, endTime: String, startDate: String, endDate: String, eventType: Int){
         val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
 
@@ -95,6 +88,7 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
             "location" to GeoPoint(latitude, longitude),
             "startTime" to startTimestamp,
             "endTime" to endTimestamp,
+            "eventType" to eventType
         )
         db.collection("events")
             .add(event)
@@ -168,12 +162,25 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
 
         }
 
+        var eventType = 0
+        requireView().findViewById<RadioButton>(R.id.sportingRadioButton).setOnClickListener {
+            eventType = 1
+        }
+        requireView().findViewById<RadioButton>(R.id.foodRadioButton).setOnClickListener {
+            eventType = 2
+        }
+        requireView().findViewById<RadioButton>(R.id.socialRadioButton).setOnClickListener {
+            eventType = 3
+        }
+        requireView().findViewById<RadioButton>(R.id.festivalsRadioButton).setOnClickListener {
+            eventType = 4
+        }
 
         eventImage = requireView().findViewById<ImageView>(R.id.eventImage)
         requireView().findViewById<Button>(R.id.postEventButton).setOnClickListener {
             eventName = requireView().findViewById<EditText>(R.id.eventNameEditText).text.toString()
             description = requireView().findViewById<EditText>(R.id.eventDescriptionEditText).text.toString()
-            if(eventName == null || description == null || latitude == null || longitude == null || startTime == null || endTime == null || startDate == null || endDate == null){
+            if(eventName == null || description == null || latitude == null || longitude == null || startTime == null || endTime == null || startDate == null || endDate == null || eventType == 0){
                 Toast.makeText(
                     requireContext(),
                     "Please Make Sure All Fields Are Filled",
@@ -197,7 +204,7 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
                         Toast.LENGTH_SHORT,
                     ).show()
                     imageURL = "no image"
-                    addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!)
+                    addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!, eventType)
                     navigateToFragment(MapsFragment::class.java, "showing Map")
                 }.addOnSuccessListener {
                     Toast.makeText(
@@ -206,7 +213,7 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
                         Toast.LENGTH_SHORT,
                     ).show()
                     imageURL = imageFile.name
-                    addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!)
+                    addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!, eventType)
                     navigateToFragment(MapsFragment::class.java, "showing Map")
                 }
             }

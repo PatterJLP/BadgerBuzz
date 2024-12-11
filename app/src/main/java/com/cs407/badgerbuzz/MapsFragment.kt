@@ -1,19 +1,20 @@
 package com.cs407.badgerbuzz
 
-import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.PopupMenu
-import android.widget.Spinner
+import android.widget.SearchView
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -27,6 +28,7 @@ class MapsFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var googleMap: GoogleMap
     private val db = FirebaseFirestore.getInstance()
+    private lateinit var searchView: SearchView
 
     private val callback = OnMapReadyCallback { map ->
         googleMap = map
@@ -83,6 +85,9 @@ class MapsFragment : Fragment() {
         auth = Firebase.auth
     }
 
+    private var filter = 0L
+    private var textFilter = ""
+
     private val markersMap = mutableMapOf<String, com.google.android.gms.maps.model.Marker>()
     private fun addMarkers() {
         db.collection("events")
@@ -92,14 +97,34 @@ class MapsFragment : Fragment() {
                     val eventId = document.id
                     val eventName = document.getString("eventName")
                     val location = document.getGeoPoint("location")
+                    val type = document.get("eventType")
+                    val description = document.getString("description")
+                    var hue = 0f
+                    when (type) {
+                        2L -> {
+                            hue = 90f
+                        }
+                        3L -> {
+                            hue = 180f
+                        }
+                        4L -> {
+                            hue = 270f
+                        }
+                    }
 
-                    if (location != null) {
+                    if (location != null &&
+                        (filter == 0L || type == filter) &&
+                        (textFilter.isEmpty() ||
+                                (eventName != null && description != null &&
+                                        (eventName.contains(searchView.query.trim()) ||
+                                                description.contains(searchView.query.trim()))))) {
                         val latLng = LatLng(location.latitude, location.longitude)
 
                         val marker = googleMap.addMarker(
                             MarkerOptions()
                                 .position(latLng)
                                 .title(eventName)
+                                .icon(BitmapDescriptorFactory.defaultMarker(hue))
                         )
                         if (marker != null) {
                             markersMap[eventId] = marker
@@ -145,8 +170,12 @@ class MapsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val viewList = view.findViewById<TextView>(R.id.viewAllEvents)
         viewList.setOnClickListener() {
-            navigateToFragment(EventListFragment::class.java, "showing list of Events")
-
+            //navigateToFragment(EventListFragment::class.java, "showing list of Events")
+            filter = 0L
+            searchView.setQuery("", true)
+            searchView.clearFocus()
+            googleMap.clear()
+            addMarkers()
         }
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment?
@@ -174,23 +203,45 @@ class MapsFragment : Fragment() {
             popupMenu.show()
         }
 
-
-        val spinner: Spinner = view.findViewById(R.id.filterTests)
-        ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.filter_array,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = adapter
-        }
-
         val fab = view.findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
             navigateToFragment(LocationFragment::class.java, "showing location")
         }
 
+        requireView().findViewById<Button>(R.id.sportingButton).setOnClickListener {
+            filter = 1L
+            googleMap.clear()
+            addMarkers()
+        }
+        requireView().findViewById<Button>(R.id.foodButton).setOnClickListener {
+            filter = 2L
+            googleMap.clear()
+            addMarkers()
+        }
+        requireView().findViewById<Button>(R.id.socialButton).setOnClickListener {
+            filter = 3L
+            googleMap.clear()
+            addMarkers()
+        }
+        requireView().findViewById<Button>(R.id.festivalButton).setOnClickListener {
+            filter = 4L
+            googleMap.clear()
+            addMarkers()
+        }
 
+        searchView = requireView().findViewById(R.id.searchView)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                textFilter = query ?: ""
+                googleMap.clear()
+                addMarkers()
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
     }
 
     private fun navigateToFragment(fragmentClass: Class<out Fragment>, backStackName: String?) {
