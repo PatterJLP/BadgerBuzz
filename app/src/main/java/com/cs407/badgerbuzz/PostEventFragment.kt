@@ -196,6 +196,9 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
                         "Image upload failed",
                         Toast.LENGTH_SHORT,
                     ).show()
+                    imageURL = "no image"
+                    addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!)
+                    navigateToFragment(MapsFragment::class.java, "showing Map")
                 }.addOnSuccessListener {
                     Toast.makeText(
                         requireContext(),
@@ -203,10 +206,9 @@ class PostEventFragment : Fragment(), DatePickerFragment.OnDateSelectedListener,
                         Toast.LENGTH_SHORT,
                     ).show()
                     imageURL = imageFile.name
+                    addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!)
+                    navigateToFragment(MapsFragment::class.java, "showing Map")
                 }
-                if (imageURL == null) imageURL = "no image"
-                addEvent(eventName!!,description!!,imageURL!!,latitude!!,longitude!!,startTime!!,endTime!!,startDate!!,endDate!!)
-                navigateToFragment(MapsFragment::class.java, "showing Map")
             }
         }
 

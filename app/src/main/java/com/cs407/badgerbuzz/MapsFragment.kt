@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.Spinner
@@ -19,13 +18,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
-
 
 
 class MapsFragment : Fragment() {
@@ -39,17 +34,55 @@ class MapsFragment : Fragment() {
         val Madison = LatLng(43.07340550591327, -89.40070146109815)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Madison, 15f))
 
+        map.setOnMarkerClickListener { marker ->
+            markersMap.forEach { entry ->
+                if (entry.value.title == marker.title) {
+                    db.collection("events")
+                        .get()
+                        .addOnSuccessListener { querySnapshot ->
+                            for (document in querySnapshot) {
+                                if (document.id == entry.key) {
+                                    val bundle = Bundle()
+                                    bundle.putString("eventName", document.getString("eventName"))
+                                    bundle.putString(
+                                        "description",
+                                        document.getString("description")
+                                    )
+                                    bundle.putString("imageUrl", document.getString("imageUrl"))
+                                    val location = document.getGeoPoint("location")
+                                    if (location != null) {
+                                        bundle.putDouble("latitude", location.latitude)
+                                        bundle.putDouble("longitude", location.longitude)
+                                    }
+                                    val start =
+                                        document.getTimestamp("startTime")?.toDate().toString()
+                                    bundle.putString("startTime", start)
+                                    val end = document.getTimestamp("endTime")?.toDate().toString()
+                                    bundle.putString("endTime", end)
+                                    parentFragmentManager.beginTransaction()
+                                        .replace(R.id.fragmentContainerView, ViewEventFragment.newInstance(bundle))
+                                        .commit()
+                                }
+                            }
+                        }
+                        .addOnFailureListener { exception ->
+                            exception.printStackTrace()
+                        }
+                }
+            }
+            true
+        }
+
         addMarkers()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
-
-
     }
 
     private val markersMap = mutableMapOf<String, com.google.android.gms.maps.model.Marker>()
-    private fun addMarkers(){
+    private fun addMarkers() {
         db.collection("events")
             .get()
             .addOnSuccessListener { querySnapshot ->
@@ -76,6 +109,7 @@ class MapsFragment : Fragment() {
                 exception.printStackTrace()
             }
     }
+
     private fun listenForEventRemovals() {
         db.collection("events")
             .addSnapshotListener { snapshots, error ->
@@ -96,7 +130,6 @@ class MapsFragment : Fragment() {
     }
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -113,7 +146,8 @@ class MapsFragment : Fragment() {
             navigateToFragment(EventListFragment::class.java, "showing list of Events")
 
         }
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment?
+        val mapFragment =
+            childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
 
         listenForEventRemovals()
@@ -128,18 +162,15 @@ class MapsFragment : Fragment() {
                     R.id.action_logout -> {
                         Firebase.auth.signOut()
                         clearBackStack()
-                        navigateToFragment(LoginFragment::class.java,null)
+                        navigateToFragment(LoginFragment::class.java, null)
                         true
                     }
+
                     else -> false
                 }
             }
             popupMenu.show()
         }
-
-
-
-
 
 
         val spinner: Spinner = view.findViewById(R.id.filterTests)
@@ -177,5 +208,6 @@ class MapsFragment : Fragment() {
             }
         }
     }
+
 
 }
